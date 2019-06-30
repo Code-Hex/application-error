@@ -7,14 +7,11 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+
+	"github.com/Code-Hex/application-error/internal/storage"
 )
 
-type Service interface {
-	Get(ctx context.Context, key string) (string, error)
-	Put(ctx context.Context, key, value string) error
-}
-
-func NewGethandler(s Service) http.Handler {
+func NewGethandler(s storage.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "Requires GET", http.StatusMethodNotAllowed)
@@ -30,7 +27,7 @@ func NewGethandler(s Service) http.Handler {
 	})
 }
 
-func NewPuthandler(s Service) http.Handler {
+func NewPuthandler(s storage.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Requires POST", http.StatusMethodNotAllowed)
