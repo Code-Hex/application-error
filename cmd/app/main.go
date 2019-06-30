@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Code-Hex/application-error/internal/application"
 	"github.com/Code-Hex/application-error/internal/handler"
@@ -26,7 +27,18 @@ func run() error {
 
 	log.Printf("starting port: %d", port)
 
-	h := handler.New()
+	h := handler.New(
+		func(h http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				start := time.Now()
+				h.ServeHTTP(w, r)
+				path := r.URL.Path
+				if "/_ah/health" != path {
+					log.Printf("path: %s, duration: %s", r.URL.String(), time.Now().Sub(start).String())
+				}
+			})
+		},
+	)
 
 	h.Handle("/_ah/health", health.NewHandler())
 
